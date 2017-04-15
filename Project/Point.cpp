@@ -1,75 +1,62 @@
 #include<iostream>
 #include<string.h>
-#include"Student.h"
-#include<fstream>
+#include"Point.h"
 
 using namespace std;
 
-P_Student newStudentNode()
+P_Point newPointNode()
 {
-	P_Student Ptr = new StudentNode();
+	P_Point Ptr = new PointNode();
 	return Ptr;
 }
-
-P_Student newStudent(Student &Temp)
+P_Point newPoint(Point &Temp)
 {
-	P_Student Ptr = new StudentNode();
+	P_Point Ptr = new PointNode();
 	Ptr->Data = Temp;
 	Ptr->Next = NULL;
 	return Ptr;
 }
 
-P_Student searchId(P_Student First, char id[])
+void insertFirst(P_Point &First, Point &Temp)
 {
-	while (First != NULL)
-	{
-		if (_stricmp(First->Data.id, id) == 0)
-			return First;
-		else First = First->Next;
-	}
-	return NULL;
-}
-
-void insertFirst(P_Student &First, Student &Temp)
-{
-	P_Student Ptr = newStudent(Temp);
+	P_Point Ptr = newPoint(Temp);
 	Ptr->Next = First;
 	First = Ptr;
 }
 
-int insertAfter(P_Student Ptr, Student &Temp)
+int insertAfter(P_Point Ptr, Point &Temp)
 {
 	if (Ptr == NULL)
 		return FALSE;
-	P_Student PtrTemp = newStudent(Temp);
+	P_Point PtrTemp = newPoint(Temp);
 	PtrTemp->Next = Ptr->Next;
 	Ptr->Next = PtrTemp;
 	return TRUE;
 }
 
-int deleteAfter(P_Student Ptr)
+int deleteAfter(P_Point Ptr)
 {
 	if (Ptr == NULL || Ptr->Next == NULL)
 		return FALSE;
-	P_Student PtrTemp = Ptr->Next;
+	P_Point PtrTemp = Ptr->Next;
 	Ptr->Next = PtrTemp->Next;
 	delete PtrTemp;
 	return TRUE;
 }
 
-int deleteFirst(P_Student &First)
+int deleteFirst(P_Point &First)
 {
 	if (First == NULL)
 		return FALSE;
-	P_Student PtrTemp = First;
+	P_Point PtrTemp = First;
 	First = PtrTemp->Next;
 	delete PtrTemp;
 	return TRUE;
 }
 
-void insertLast(P_Student &First, P_Student &Last, Student &Temp)
+void insertLast(P_Point &First, P_Point &Last, Point &Temp)
 {
-	P_Student PtrTemp = newStudent(Temp);
+	P_Point PtrTemp = newPoint(Temp);
 	if (Last == NULL && First == NULL)
 	{
 		First = PtrTemp;
@@ -80,7 +67,7 @@ void insertLast(P_Student &First, P_Student &Last, Student &Temp)
 	Last = Last->Next;
 }
 
-int deleteLast(P_Student &First, P_Student &Last)
+int deleteLast(P_Point &First, P_Point &Last)
 {
 	if (First == NULL)
 		return FALSE;
@@ -90,7 +77,7 @@ int deleteLast(P_Student &First, P_Student &Last)
 		Last = NULL;
 		return TRUE;
 	}
-	P_Student PtrTemp = First;
+	P_Point PtrTemp = First;
 	while (PtrTemp->Next != Last)
 		PtrTemp = PtrTemp->Next;
 	deleteAfter(PtrTemp);

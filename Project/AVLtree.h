@@ -10,12 +10,14 @@
 #define RIGHT_HIGHER -1
 #define EQUAL 0
 
+const int MAX = 100;
+
 struct Course
 {
 	char courseId[20];  // id cua khoa hoc
 	char courseName[40]; // ten cua khoa hoc
 	int theoryCredit; // so tin chi ly thuyet
-	int praticeCredit; // so tin chi thuc hanh
+	int practiceCredit; // so tin chi thuc hanh
 };
 
 struct AVLTree
@@ -57,7 +59,16 @@ void readFileAVL(P_AVL &Root);
 void clearFileAVL();
 //-----------------------------------------------------------------------------
 
+// set Data
+int setCourseId(P_AVL Root, Course &Temp, char id[]);
+int setCourseName(P_AVL Root, Course &Temp, char name[]);
+void setPracticeCredit(Course &Temp, int credit);
+void setTheoryCredit(Course &Temp, int credit);
 
 //---------------------testConsole--------------------------------------
 int createData(P_AVL Root, Course &DataTemp);
 void traverseLNR(P_AVL Root);
+int checkAVL(P_AVL Root);
+int findHeight(P_AVL Root);
+int findMax(int array[], int nArray);
+void showBalFactor(P_AVL Root);

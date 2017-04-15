@@ -33,20 +33,6 @@ P_AVL searchCourseName(P_AVL Root, char name[])
 			STACK[++top] = Root;
 			Root = Root->Left;
 		}
-		/*if (top == -1)
-			break;
-		while (top != -1)
-		{
-			if (_stricmp(STACK[top]->Data.courseName, name) == 0)
-				return STACK[top];
-			else {
-				if (STACK[top]->Right != NULL)
-				{
-					Root=STACK[top--]->Right;
-				}
-				top--;
-			}
-		}*/
 		if (top != -1)
 		{
 			if (_stricmp(STACK[top]->Data.courseName, name) == 0)
@@ -83,9 +69,11 @@ void rotateLL(P_AVL & Ptr)  // Truong hop bi lech trai trai
 	case LEFT_HIGHER: // khoa trai bi lech trai
 		Ptr->balFactor = EQUAL;
 		PtrTemp->balFactor = EQUAL;
+		break;
 	case EQUAL: // khoa trai do cao nhu nhau
 		Ptr->balFactor = LEFT_HIGHER;
 		PtrTemp->balFactor = RIGHT_HIGHER;
+		break;
 	}
 	Ptr = PtrTemp;
 }
@@ -99,8 +87,12 @@ void rotateRR(P_AVL & Ptr) // truong hop bi lech phai phai
 	{
 	case RIGHT_HIGHER:
 		Ptr->balFactor = EQUAL;
-		PtrTemp->balFactor = Ptr->balFactor = RIGHT_HIGHER;
+		PtrTemp->balFactor = EQUAL;
+		break;
+	case EQUAL:
+		Ptr->balFactor = RIGHT_HIGHER;
 		PtrTemp->balFactor = LEFT_HIGHER;
+		break;
 	}
 	Ptr = PtrTemp;
 }
@@ -118,12 +110,15 @@ void rotateLR(P_AVL & Ptr)// truong hop bi lech trai phai
 	case LEFT_HIGHER: 
 		PtrTemp_1->balFactor = EQUAL;
 		Ptr->balFactor = RIGHT_HIGHER;
+		break;
 	case RIGHT_HIGHER:
 		PtrTemp_1->balFactor = LEFT_HIGHER;
 		Ptr->balFactor = EQUAL;
+		break;
 	case EQUAL:
 		PtrTemp_1->balFactor = EQUAL;
 		Ptr->balFactor = EQUAL;
+		break;
 	}
 	Ptr = PtrTemp_2;
 	Ptr->balFactor = EQUAL;
@@ -142,12 +137,15 @@ void rotateRL(P_AVL & Ptr)// truong hop bi lech phai trai
 	case LEFT_HIGHER:
 		PtrTemp_1->balFactor = RIGHT_HIGHER;
 		Ptr->balFactor = EQUAL;
+		break;
 	case RIGHT_HIGHER:
 		PtrTemp_1->balFactor = EQUAL;
 		Ptr->balFactor = LEFT_HIGHER;
+		break;
 	case EQUAL:
 		PtrTemp_1->balFactor = EQUAL;
 		Ptr->balFactor = EQUAL;
+		break;
 	}
 	Ptr = PtrTemp_2;
 	Ptr->balFactor = EQUAL;
@@ -202,7 +200,7 @@ int insertCourse(P_AVL &Root, Course &Temp)
 	}
 	if (_stricmp(Root->Data.courseId, Temp.courseId) == 0)
 		return FALSE;
-	if (_stricmp(Root->Data.courseId, Temp.courseId) < 0)
+	if (_stricmp(Root->Data.courseId, Temp.courseId) > 0)
 	{
 		res = insertCourse(Root->Left, Temp);
 		if (res != CONTINUE)
@@ -220,24 +218,22 @@ int insertCourse(P_AVL &Root, Course &Temp)
 			return TRUE;
 		}
 	}
-	else {
-		if (_stricmp(Root->Data.courseId, Temp.courseId) > 0)
+	if (_stricmp(Root->Data.courseId, Temp.courseId) < 0)
+	{
+		res = insertCourse(Root->Right, Temp);
+		if (res != CONTINUE)
+			return res;
+		switch (Root->balFactor)
 		{
-			res = insertCourse(Root->Right, Temp);
-			if (res != CONTINUE)
-				return res;
-			switch (Root->balFactor)
-			{
-			case LEFT_HIGHER:
-				Root->balFactor = EQUAL;
-				return TRUE;
-			case EQUAL:
-				Root->balFactor = RIGHT_HIGHER;
-				return CONTINUE;
-			case RIGHT_HIGHER:
-				balanceRight(Root);
-				return TRUE;
-			}
+		case LEFT_HIGHER:
+			Root->balFactor = EQUAL;
+			return TRUE;
+		case EQUAL:
+			Root->balFactor = RIGHT_HIGHER;
+			return CONTINUE;
+		case RIGHT_HIGHER:
+			balanceRight(Root);
+			return TRUE;
 		}
 	}
 }
@@ -245,9 +241,7 @@ int insertCourse(P_AVL &Root, Course &Temp)
 void searchSmallestID(P_AVL Root, Course & Temp)
 {
 	while (Root->Left != NULL)
-	{
 		Root = Root->Left;
-	}
 	Temp = Root->Data;
 }
 
@@ -256,7 +250,7 @@ int deleteCourse(P_AVL &Root, char id[])
 	int res;
 	if (Root == NULL)
 		return FALSE;
-	if (_stricmp(Root->Data.courseId, id) < 0)
+	if (_stricmp(Root->Data.courseId, id) > 0)
 	{
 		res = deleteCourse(Root->Left, id);
 		if (res != CONTINUE)
@@ -275,7 +269,7 @@ int deleteCourse(P_AVL &Root, char id[])
 		}
 	}
 	else {
-		if (_stricmp(Root->Data.courseId, id) > 0)
+		if (_stricmp(Root->Data.courseId, id) < 0)
 		{
 			res = deleteCourse(Root->Right, id);
 			if (res != CONTINUE)
@@ -314,7 +308,7 @@ int deleteCourse(P_AVL &Root, char id[])
 					searchSmallestID(Root->Right, Temp);
 					deleteCourse(Root, Temp.courseId);
 					Root->Data = Temp;
-					return TRUE;
+					return CONTINUE;
 				}
 			}
 		}
@@ -331,7 +325,7 @@ int createData(P_AVL Root, Course &DataTemp)
 	cout << "Nhap ten mon hoc: ", cin.getline(DataTemp.courseName, 40);
 	if (searchCourseName(Root, DataTemp.courseName) != NULL)
 		return -2;
-	cout << "Nhap so tin chi thuc hanh: ", cin >> DataTemp.praticeCredit;
+	cout << "Nhap so tin chi thuc hanh: ", cin >> DataTemp.practiceCredit;
 	cout << "Nhap so tin chi ly thuyet: ", cin >> DataTemp.theoryCredit;
 	cin.ignore();
 	return TRUE;
@@ -363,7 +357,7 @@ void traverseLNR(P_AVL Root)
 		cout << Root->Data.courseId << endl;
 		cout << Root->Data.courseName << endl;
 		cout << Root->Data.theoryCredit << endl;
-		cout << Root->Data.praticeCredit << endl;
+		cout << Root->Data.practiceCredit << endl << endl;
 		traverseLNR(Root->Right);
 	}
 }
@@ -375,44 +369,164 @@ void clearAllCourses(P_AVL &Root)
 		clearAllCourses(Root->Left);
 		clearAllCourses(Root->Right);
 		delete Root;
+		Root = NULL;
 	}
 }
 
 void clearFileAVL()
 {
-	fstream file("Tree\\Text.txt", ios::out);
+	fstream file("Data\\tree.da", ios::out);
 	file.close();
 	return;
 }
 
 void writeToFileAVL(Course &Data)
 {
-	fstream file("Tree\\Text.txt", ios::app || ios::binary);
-	file.write(reinterpret_cast<char *>(&Data), sizeof(Course));
+	fstream file("Data\\tree.da", ios::app | ios::binary);
+	file.write((char*)(&Data), sizeof(Course));
 	file.close();
 }
 
 void writeToFileAVL(P_AVL Root)
 {
-	if (Root != NULL)
+	if (Root == NULL)
+		return;
+	clearFileAVL();
+	fstream file("Data\\tree.da", ios::app | ios::binary | ios::out);
+	P_AVL STACK[100];
+	int top = -1;
+	while (1)
 	{
-		writeToFileAVL(Root->Left);
-		writeToFileAVL(Root->Right);
-		fstream file("Tree\\Text.txt", ios::app || ios::binary);
-		file.write(reinterpret_cast<char *>(&Root->Data), sizeof(Course));
-		file.close();
+		file.write((char*)(&(Root->Data)), sizeof(Course));
+		if (Root->Right != NULL)
+			STACK[++top] = Root->Right;
+		if (Root->Left != NULL)
+			Root = Root->Left;
+		else {
+			if (top != -1)
+				Root = STACK[top--];
+			else {
+				file.close();
+				break;
+			}
+		}
 	}
 }
 
 void readFileAVL(P_AVL &Root)
 {
 	
-	fstream file("Tree\\Text.txt", ios::in || ios::binary);
+	fstream file("Data\\tree.da", ios::in | ios::binary);
 	Course Data;
 	while (file)
 	{
-		file.read(reinterpret_cast<char *>(&Data), sizeof(Course));
+		file.read((char*)(&Data), sizeof(Course));
 		insertCourse(Root, Data);
 	}
 	file.close();
+}
+
+int findMax(int array[], int nArray)
+{
+	for (int i = 1; i < nArray; i++)
+	{
+		if (array[0] < array[i])
+			array[0] = array[i];
+	}
+	return array[0];
+}
+
+int findHeight(P_AVL Root)
+{
+	int stack[MAX], heightList[MAX], nList=0, height =0;
+	P_AVL Stack[MAX];
+	int top = -1;
+	if (Root == NULL)
+		return 0;
+	if (Root->Left == NULL && Root->Right == NULL)
+		return 1;
+	while (1)
+	{
+		height++;
+		if (Root->Right != NULL)
+		{
+			Stack[++top] = Root->Right;
+			stack[top] = height;
+		}
+		if (Root->Left != NULL)
+			Root = Root->Left;
+		else {
+			heightList[nList++] = height;
+			if (top != -1)
+			{
+				Root = Stack[top];
+				height = stack[top--];
+			}
+			else break;
+		}
+	}
+	return findMax(heightList, nList);
+}
+
+int checkAVL(P_AVL Root)
+{
+	P_AVL Stack[MAX];
+	int top = -1;
+	int result;
+	if (Root == NULL)
+		return FALSE;
+	while (1)
+	{
+		result = findHeight(Root->Left) - findHeight(Root->Right);
+		if (abs(result) != 1 && abs(result) != 0)
+			return FALSE;
+		if (Root->Right != NULL)
+		{
+			Stack[++top] = Root->Right;
+		}
+		if (Root->Left != NULL)
+			Root = Root->Left;
+		else {
+			if (top != -1)
+				Root = Stack[top--];
+			else break;
+		}
+	}
+	return TRUE;
+}
+
+void showBalFactor(P_AVL Root)
+{
+	if (Root != NULL)
+	{
+		cout << Root->balFactor<<' ';
+		showBalFactor(Root->Left);
+		showBalFactor(Root->Right);
+	}
+}
+
+int setCourseId(P_AVL Root, Course &Temp, char id[])
+{
+	if (searchCourseID(Root, id) != NULL)
+		return FALSE;
+	strcpy_s(Temp.courseId, id);
+	return TRUE;
+}
+
+int setCourseName(P_AVL Root, Course &Temp, char name[])
+{
+	if (searchCourseName(Root, name) != NULL)
+		return FALSE;
+	strcpy_s(Temp.courseName, name);
+	return TRUE;
+}
+
+void setPracticeCredit(Course &Temp, int credit)
+{
+	Temp.practiceCredit = credit;
+}
+
+void setTheoryCredit(Course &Temp, int credit)
+{
+	Temp.theoryCredit = credit;
 }
